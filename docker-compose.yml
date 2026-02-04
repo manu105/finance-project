@@ -1,0 +1,42 @@
+version: '3.9'
+
+services:
+  db:
+    image: mysql:8.3
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: finance
+      MYSQL_USER: finance
+      MYSQL_PASSWORD: financepass
+      MYSQL_ROOT_PASSWORD: rootpass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_DB: finance
+      MYSQL_USER: finance
+      MYSQL_PASSWORD: financepass
+      JWT_SECRET: "change-me-in-prod-change-me-in-prod"
+      JWT_EXPIRATION_MINUTES: 60
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
